@@ -187,8 +187,7 @@ int main()
 	_tagPlayer	tPlayer = {};
 
 	// 플레이어 이름을 입력받는다.
-	cout << "이름 : ";
-	cin.getline(tPlayer.strName, NAME_SIZE - 1);
+	
 
 	int	iJob = JOB_NONE;
 	while (iJob == JOB_NONE)

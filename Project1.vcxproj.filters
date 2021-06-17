@@ -21,10 +21,13 @@
     <ClCompile Include="tetris.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="bingo.cpp">
+    <ClCompile Include="puzzle.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="textRPG.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="textRPG_main.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
