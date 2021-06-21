@@ -21,15 +21,88 @@ typedef struct _tagPlayer
 
 
 void SetMaze(char Maze[21][21], PPLAYER pPlayer, PPOINT pStartPos, PPOINT pEndPos) {
+	// maze_list.txt 파일을 읽어와서 미로 목록을 만듦
+	
+	FILE* pFile = NULL;
+	fopen_s(&pFile, "maze_list.txt", "rt");
+
+	char** pMazeList = NULL;
+
+	if (pFile)
+	{
+		char cCount;
+
+		fread(&cCount, 1, 1, pFile);
+		int iMazeCount = atoi(&cCount);
+		fread(&cCount, 1, 1, pFile); // '/0' 제거
+			
+		pMazeList = new char*[iMazeCount];
+
+		for (int i = 0; i < iMazeCount; ++i)
+		{
+			int iNameCount = 0;
+			pMazeList[i] = new char[256];
+			
+			while (true)
+			{
+				fread(&cCount, 1, 1, pFile);
+				if (cCount != '\n')
+				{
+					pMazeList[i][iNameCount] = cCount;
+					++iNameCount;
+				}
+				else
+					break;
+			}
+			pMazeList[i][iNameCount] = 0;
+			cout << pMazeList[i] << endl;
+		}
+
+		fclose(pFile);
+
+		for (int i = 0; i < iMazeCount; i++)
+		{
+			cout << i + 1 << ". " << pMazeList[i] << endl;
+		}
+		cout << "미로를 선택하세요: ";
+		int iSelect;
+		cin >> iSelect;
+		fopen_s(&pFile, pMazeList[iSelect - 1], "rt");
+		if (pFile)
+		{
+
+			for (size_t i = 0; i < 20; i++)
+			{
+				fread(Maze[i], 1, 20, pFile);
+				
+				// 현재 줄의 미로를 검사하여 시작점, 도착점이 있는지 확인
+				for (int j = 0; j < 20; j++)
+				{
+					if (Maze[i][j] == '2')
+					{
+						pStartPos->x = j;
+						pStartPos->y = i;
+						pPlayer->tPos = *pStartPos;
+					}
+					else if (Maze[i][j] == '3')
+					{
+						pEndPos->x = j;
+						pEndPos->y = i;
+					}
+				}
+
+				fread(&cCount, 1, 1, pFile);
+			}
+			fclose(pFile);
+		}
+	}
+	
 	// 0 wall 1 road, 2 start, 3 end 
 	// 4 bomb, 5 item1 power up, 6 item2 push, 7 item3 fly
-	pStartPos->x = 0;
-	pStartPos->y = 0;
-	pEndPos->x = 19;
-	pEndPos->y = 19;
 
-	pPlayer->tPos = *pStartPos;
 
+	
+	/*
 	strcpy_s(Maze[0],  "21000000000000000000");
 	strcpy_s(Maze[1],  "01000000000000040000");
 	strcpy_s(Maze[2],  "01000005005000000000");
@@ -49,7 +122,7 @@ void SetMaze(char Maze[21][21], PPLAYER pPlayer, PPOINT pStartPos, PPOINT pEndPo
 	strcpy_s(Maze[16], "01000000000000000000");
 	strcpy_s(Maze[17], "01000000000050000000");
 	strcpy_s(Maze[18], "01000000000070000000");
-	strcpy_s(Maze[19], "01111111111111111113");
+	strcpy_s(Maze[19], "01111111111111111113");*/
 	
 }
 
