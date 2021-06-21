@@ -28,6 +28,7 @@ typedef struct _tagNode
 	
 }NODE, *PNODE;
 
+
 // 연결리스트 구조체
 typedef struct _tagList
 {
@@ -35,6 +36,7 @@ typedef struct _tagList
 	PNODE	pEnd;
 	int		iSize;
 }LIST, *PLIST;
+
 
 void InitList(PLIST pList)
 {
