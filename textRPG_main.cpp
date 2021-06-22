@@ -1,6 +1,15 @@
 #include<iostream>
 #include<time.h>
+
 using namespace std;
+
+enum GAME_MODE
+{
+	GM_NONE,
+	GM_NEW,
+	GM_LOAD,
+	GM_END
+};
 
 enum MAIN_MENU
 {
@@ -459,6 +468,9 @@ int SelectJob()
 
 void SetPlayer(_tagPlayer* pPlayer)
 {
+	cin.clear();
+	cin.ignore(1024, '\n');
+
 	cout << "이름 : ";
 	cin.getline(pPlayer->strName, NAME_SIZE - 1);
 	pPlayer->eJob = (JOB) SelectJob();
@@ -504,6 +516,111 @@ void SetPlayer(_tagPlayer* pPlayer)
 		break;
 	}
 
+}
+
+bool LoadPlayer(_tagPlayer* pPlayer) 
+{
+	FILE* pFile = NULL;
+
+	fopen_s(&pFile, "Player.ply", "rb");
+	if (pFile)
+	{
+		/*	char	strName[NAME_SIZE];
+			char	strJobName[NAME_SIZE];
+			JOB		eJob;
+			int		iAttackMin;
+			int		iAttackMax;
+			int		iArmorMin;
+			int		iArmorMax;
+			int		iHP;
+			int		iHPMax;
+			int		iMP;
+			int		iMPMax;
+			int		iExp;
+			int		iLevel;
+			_tagItem	tEquip[EQ_MAX];
+			bool		bEquip[EQ_MAX];
+			_tagInventory	tInventory;
+		*/
+		//플레이어 이름
+		// 문자열은 배열이므로 주소 그대로 넘어감 (& 적지 않음)
+		fread(pPlayer->strName, 1, NAME_SIZE, pFile);
+		// 플레이어 직업
+		fread(&pPlayer->eJob, sizeof(JOB), 1, pFile);
+		fread(pPlayer->strJobName, 1, NAME_SIZE, pFile);
+		// 플레이어 스탯
+		fread(&pPlayer->iAttackMax, 4, 1, pFile);
+		fread(&pPlayer->iAttackMin, 4, 1, pFile);
+		fread(&pPlayer->iArmorMax, 4, 1, pFile);
+		fread(&pPlayer->iAttackMin, 4, 1, pFile);
+		fread(&pPlayer->iHP, 4, 1, pFile);
+		fread(&pPlayer->iHPMax, 4, 1, pFile);
+		fread(&pPlayer->iMP, 4, 1, pFile);
+		fread(&pPlayer->iMPMax, 4, 1, pFile);
+		fread(&pPlayer->iExp, 4, 1, pFile);
+		fread(&pPlayer->iLevel, 4, 1, pFile);
+		// 플레이어 아이템
+		fread(&pPlayer->bEquip[EQ_WEAPON], 1, 1, pFile);
+		if (pPlayer->bEquip[EQ_WEAPON])
+			fread(&pPlayer->tEquip[EQ_WEAPON], sizeof(_tagItem), 1, pFile);
+
+		fread(&pPlayer->bEquip[EQ_ARMOR], 1, 1, pFile);
+		if (pPlayer->bEquip[EQ_ARMOR])
+			fread(&pPlayer->tEquip[EQ_ARMOR], sizeof(_tagItem), 1, pFile);
+
+		fread(&pPlayer->tInventory.iGold, 4, 1, pFile);
+		fread(&pPlayer->tInventory.iItemCount, 4, 1, pFile);
+		fread(pPlayer->tInventory.tItem, sizeof(_tagItem), pPlayer->tInventory.iItemCount, pFile);
+		
+
+
+		fclose(pFile);
+		return true;
+	}
+
+	return false;
+}
+
+bool SavePlayer(_tagPlayer* pPlayer) 
+{
+	FILE* pFile = NULL;
+	fopen_s(&pFile, "Player.ply", "wb");
+	if (pFile)
+	{
+		//플레이어 이름
+		// 문자열은 배열이므로 주소 그대로 넘어감 (& 적지 않음)
+		fwrite(pPlayer->strName, 1, NAME_SIZE, pFile);
+		// 플레이어 직업
+		fwrite(&pPlayer->eJob, sizeof(JOB), 1, pFile);
+		fwrite(pPlayer->strJobName, 1, NAME_SIZE, pFile);
+		// 플레이어 스탯
+		fwrite(&pPlayer->iAttackMax, 4, 1, pFile);
+		fwrite(&pPlayer->iAttackMin, 4, 1, pFile);
+		fwrite(&pPlayer->iArmorMax, 4, 1, pFile);
+		fwrite(&pPlayer->iAttackMin, 4, 1, pFile);
+		fwrite(&pPlayer->iHP, 4, 1, pFile);
+		fwrite(&pPlayer->iHPMax, 4, 1, pFile);
+		fwrite(&pPlayer->iMP, 4, 1, pFile);
+		fwrite(&pPlayer->iMPMax, 4, 1, pFile);
+		fwrite(&pPlayer->iExp, 4, 1, pFile);
+		fwrite(&pPlayer->iLevel, 4, 1, pFile);
+		// 플레이어 아이템
+		fwrite(&pPlayer->bEquip[EQ_WEAPON], 1, 1, pFile);
+		if (pPlayer->bEquip[EQ_WEAPON])
+			fwrite(&pPlayer->tEquip[EQ_WEAPON], sizeof(_tagItem), 1, pFile);
+
+		fwrite(&pPlayer->bEquip[EQ_ARMOR], 1, 1, pFile);
+		if (pPlayer->bEquip[EQ_ARMOR])
+			fwrite(&pPlayer->tEquip[EQ_ARMOR], sizeof(_tagItem), 1, pFile);
+
+		fwrite(&pPlayer->tInventory.iGold, 4, 1, pFile);
+		fwrite(&pPlayer->tInventory.iItemCount, 4, 1, pFile);
+		fwrite(pPlayer->tInventory.tItem, sizeof(_tagItem), pPlayer->tInventory.iItemCount, pFile);
+
+		fclose(pFile);
+		return true;
+	}
+	return false;
 }
 
 _tagMonster CreateMonster(const char* pName, int iAttackMin, int iAttackMax,	int iArmorMin,
@@ -666,6 +783,7 @@ void RunStore(_tagInventory* pInventory, _tagItem* pWeapon, _tagItem* pArmor)
 		}
 	}
 }
+
 _tagItem CreateItem(const char* pName, ITEM_TYPE eType, int iMin, int iMax,
 	int iPrice, int	iSell, const char* pDesc)
 {
@@ -786,7 +904,37 @@ int main()
 	srand((unsigned int)time(0));
 
 	_tagPlayer	tPlayer = {};
-	SetPlayer(&tPlayer);
+	int iGameMode = 0;
+
+	while (iGameMode <= GM_NONE || iGameMode > GM_END)
+	{
+		system("cls");
+		cout << "1. 새로하기" << endl;
+		cout << "2. 이어하기" << endl;
+		cout << "3. 종료" << endl;
+		cout << "메뉴를 선택하세요: ";
+		iGameMode = InputInt();
+	}
+	if (iGameMode == GM_END)
+		return 0;
+
+	switch (iGameMode)
+	{
+	case GM_NEW:
+		SetPlayer(&tPlayer);
+		break;
+	case GM_LOAD:
+		if (!LoadPlayer(&tPlayer))
+		{
+			cout << "저장된 플레이어가 없습니다." << endl;
+			cout << "새로운 플레이어로 시작합니다." << endl;
+			SetPlayer(&tPlayer);
+			system("pause");
+		}
+		break;
+	}
+
+	//SetPlayer(&tPlayer);
 	_tagMonster tMonsterArr[MT_BACK - 1] = {};
 	SetMonster(tMonsterArr);
 
@@ -826,5 +974,6 @@ int main()
 			break;
 		}
 	}
+	SavePlayer(&tPlayer);
 	return 0;
 }
